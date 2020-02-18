@@ -4,7 +4,9 @@
 <div class="row">
 <div class="col-sm-12">
     <h1 class="display-3">Data</h1>   
-    
+    @if(Session::has('message'))
+<p class="alert {{ Session::get('alert-class', 'alert-info') }}">{{ Session::get('message') }}</p>
+@endif
   <table class="table table-striped">
     <thead>
         <tr>

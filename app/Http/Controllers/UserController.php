@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 use App\User; // 
 use Illuminate\Http\Request;
 use Validator;
+use Session;
+use Redirect;
+use Exception;
 
 class UserController extends Controller
 {
@@ -57,19 +60,37 @@ public function store(Request $request)
         $key = random_int(1, 9);
 
         $input = $request->get('ori_text');
-        $randkey = $this->unique_key($key);
-        $encrypted = $this->encrypt_string($input, $key);
+     
+        //dd($randkey);
+        try {
 
-    
+            $encrypted = $this->encrypt_string($input, $key);
         $decrypted = $this->decrypt_string($encrypted, $key);
+
         $user = new User([
-            'rand_key' => $randkey,
+            'rand_key' => $key,
             'encr_text' => $encrypted,
             'decr_text' => $decrypted
         ]);
-
         $user->save();
-        return redirect('/users')->with('success', 'Success!');
+        Session::flash('alert-class', 'alertsuccess');
+        return redirect('/users')->with('message', 'Success!');
+
+        } catch (Exception $exception) {
+            if ($exception->getCode() == 23000) {
+                // Deal with duplicate key error
+                Session::flash('alert-class', 'alert-danger'); 
+                return redirect('/users/create')->with('message', 'Key already used. Please try again.');  
+                //dd($exception);
+            }
+            
+           
+        
+           
+        }
+       
+        
+       
     }
     public function encrypt_string($input, $randkey)
     {
@@ -104,14 +125,5 @@ public function store(Request $request)
         return $shifted;
     }
 
-    function unique_key($randkey)
-    {
-        $d = User::where('rand_key',$randkey)->first();
-
-        if($d){
-           return false;
-        }
-
-        return random_int(1,9);
-    }
+   
 }

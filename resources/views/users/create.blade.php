@@ -6,6 +6,9 @@
     Insert Your Text
   </div>
   <div class="card-body">
+  @if(Session::has('message'))
+<p class="alert {{ Session::get('alert-class', 'alert-info') }}">{{ Session::get('message') }}</p>
+@endif
     @if ($errors->any())
       <div class="alert alert-danger">
         <ul>
